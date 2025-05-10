@@ -44,6 +44,34 @@ Every 5 seconds, each node:
 2. Sends all its keys to the peer
 3. This ensures that even if immediate propagation fails, the system will eventually become consistent
 
+#### Merkle Trees for Efficient Anti-Entropy
+
+While our current implementation uses direct key-by-key comparison, a more efficient approach for large datasets would use **Merkle trees** (hash trees):
+
+**What are Merkle Trees?**
+- A tree data structure where leaf nodes contain hashes of key-value pairs
+- Non-leaf nodes contain hashes of their child nodes
+- The root hash represents the entire dataset's state
+
+**How Merkle Trees Enable Efficient Synchronization:**
+1. Nodes exchange only their Merkle tree root hashes (32 bytes)
+2. If roots match, data is identical (no further action needed)
+3. If roots differ, nodes traverse tree paths to find differing branches
+4. Only data in differing branches needs to be synchronized
+
+**Benefits of Merkle Tree-Based Anti-Entropy:**
+- **Bandwidth Efficiency**: Only transfers data that differs, not entire datasets
+- **Quick Verification**: Can quickly determine if stores are identical with minimal data transfer
+- **Scalability**: Efficiency improves with larger datasets (logarithmic vs. linear)
+- **Deterministic**: Same data always produces the same Merkle root
+
+**Implementation Considerations:**
+- Serialization and tree traversal add complexity
+- Proper handling of empty trees and error cases is crucial
+- Hash function choice affects security and performance
+
+Our codebase includes experimental Merkle tree support using the merklecpp library, which would allow for more efficient synchronization as the dataset grows.
+
 ### Conflict Resolution
 
 When both nodes update the same key, the update with the most recent timestamp wins. This ensures that the system converges to a consistent state.

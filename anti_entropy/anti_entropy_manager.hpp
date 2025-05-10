@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
+#include <chrono>
 #include "kv_store.hpp"
 
 using boost::asio::ip::tcp;
@@ -29,100 +30,177 @@ public:
 
     void run_anti_entropy() {
         try {
-            std::cout << "Running anti-entropy synchronization..." << std::endl;
+            std::cout << "Starting anti-entropy cycle..." << std::endl;
             
-            // Get all keys from peer
-            fetch_and_update_all_keys();
-            
-            // Send all local keys to peer
+            // Step 1: Get local keys and timestamps
             auto local_keys = kv_store_.get_all_keys_with_timestamps();
-            for (const auto& [key, ts] : local_keys) {
-                send_update_to_peer(key);
+            
+            if (local_keys.empty()) {
+                std::cout << "Local store is empty, checking if peer has any data..." << std::endl;
+                auto peer_keys = get_peer_keys_with_timestamps();
+                
+                if (!peer_keys.empty()) {
+                    std::cout << "Peer has data, fetching..." << std::endl;
+                    for (const auto& [key, ts] : peer_keys) {
+                        fetch_and_update_key(key);
+                    }
+                }
+                return;
+            }
+
+            // Step 2: Get peer's keys and timestamps
+            auto peer_keys = get_peer_keys_with_timestamps();
+            
+            if (peer_keys.empty()) {
+                std::cout << "Peer has no data, sending our data..." << std::endl;
+                for (const auto& [key, ts] : local_keys) {
+                    send_update_to_peer(key);
+                }
+                return;
             }
             
-            std::cout << "Anti-entropy synchronization completed." << std::endl;
+            // Step 3: Compare keys to find differences
+            bool differences_found = false;
+            
+            // Sync local keys to peer
+            for (const auto& [key, local_ts] : local_keys) {
+                auto it = peer_keys.find(key);
+                
+                if (it == peer_keys.end()) {
+                    // Key exists locally but not on peer, send to peer
+                    differences_found = true;
+                    std::cout << "Key '" << key << "' exists locally but not on peer, sending..." << std::endl;
+                    send_update_to_peer(key);
+                } else if (local_ts > it->second) {
+                    // Local version is newer, send to peer
+                    differences_found = true;
+                    std::cout << "Local version of key '" << key << "' is newer, sending to peer..." << std::endl;
+                    send_update_to_peer(key);
+                }
+            }
+            
+            // Sync peer keys to local
+            for (const auto& [key, peer_ts] : peer_keys) {
+                auto it = local_keys.find(key);
+                
+                if (it == local_keys.end()) {
+                    // Key exists on peer but not locally, fetch it
+                    differences_found = true;
+                    std::cout << "Key '" << key << "' exists on peer but not locally, fetching..." << std::endl;
+                    fetch_and_update_key(key);
+                } else if (peer_ts > it->second) {
+                    // Peer version is newer, fetch it
+                    differences_found = true;
+                    std::cout << "Peer version of key '" << key << "' is newer, fetching..." << std::endl;
+                    fetch_and_update_key(key);
+                }
+            }
+            
+            if (!differences_found) {
+                std::cout << "No differences found, stores are in sync" << std::endl;
+            } else {
+                std::cout << "Anti-entropy synchronization completed successfully" << std::endl;
+            }
         } catch (std::exception& e) {
-            std::cerr << "Anti-entropy error: " << e.what() << "\n";
+            std::cerr << "Anti-entropy error: " << e.what() << std::endl;
         }
     }
 
 private:
+    std::unordered_map<std::string, uint64_t> get_peer_keys_with_timestamps() {
+        std::unordered_map<std::string, uint64_t> result;
+        
+        try {
+            tcp::socket socket(io_context_);
+            tcp::resolver resolver(io_context_);
+            boost::asio::connect(socket, resolver.resolve(peer_host_, std::to_string(peer_port_)));
+            
+            // Request all keys with timestamps
+            std::string request = "GET_ALL";
+            boost::asio::write(socket, boost::asio::buffer(request));
+            
+            // Read response
+            std::array<char, 8192> buffer;
+            size_t length = socket.read_some(boost::asio::buffer(buffer));
+            std::string response(buffer.data(), length);
+            
+            // Parse response into key-timestamp pairs
+            parse_keys_with_timestamps(response, result);
+        } catch (std::exception& e) {
+            std::cerr << "Error getting peer's keys: " << e.what() << std::endl;
+        }
+        
+        return result;
+    }
+    
     void fetch_and_update_key(const std::string& key) {
         try {
             tcp::socket socket(io_context_);
             tcp::resolver resolver(io_context_);
             boost::asio::connect(socket, resolver.resolve(peer_host_, std::to_string(peer_port_)));
-
+            
+            // Request the value for a specific key
             std::string request = "GET " + key;
             boost::asio::write(socket, boost::asio::buffer(request));
-
-            char data[1024];
-            size_t length = socket.read_some(boost::asio::buffer(data));
-            std::string value(data, length);
-
+            
+            // Read response
+            std::array<char, 4096> buffer;
+            size_t length = socket.read_some(boost::asio::buffer(buffer));
+            std::string value(buffer.data(), length);
+            
             if (!value.empty()) {
-                // For simplicity, we'll use the current timestamp
-                uint64_t timestamp = current_timestamp();
+                // For better timestamp handling, we should ideally include the timestamp
+                // in the response, but for simplicity we'll use current time + small offset
+                uint64_t timestamp = current_timestamp() + 1;
                 kv_store_.set(key, value, timestamp);
                 std::cout << "Updated key from peer: " << key << " = " << value << std::endl;
             }
         } catch (std::exception& e) {
-            std::cerr << "Failed to fetch and update key " << key << ": " << e.what() << "\n";
+            std::cerr << "Failed to fetch and update key " << key << ": " << e.what() << std::endl;
         }
     }
-
-    void fetch_and_update_all_keys() {
-        try {
-            tcp::socket socket(io_context_);
-            tcp::resolver resolver(io_context_);
-            boost::asio::connect(socket, resolver.resolve(peer_host_, std::to_string(peer_port_)));
-
-            std::string request = "GET_ALL";
-            boost::asio::write(socket, boost::asio::buffer(request));
-
-            char data[1024];
-            size_t length = socket.read_some(boost::asio::buffer(data));
-            std::string response(data, length);
-
-            std::unordered_map<std::string, uint64_t> keys_with_timestamps;
-            parse_keys_with_timestamps(response, keys_with_timestamps);
-
-            for (const auto& kv : keys_with_timestamps) {
-                fetch_and_update_key(kv.first);
-            }
-        } catch (std::exception& e) {
-            std::cerr << "Failed to fetch and update all keys: " << e.what() << "\n";
-        }
-    }
-
+    
     void parse_keys_with_timestamps(const std::string& data, std::unordered_map<std::string, uint64_t>& out_map) {
         if (data.empty()) return;
         
-        // Simple parsing assuming format: key1:timestamp1;key2:timestamp2;...
+        // Format: key1:timestamp1;key2:timestamp2;...
         size_t start = 0;
         while (start < data.size()) {
             size_t sep = data.find(':', start);
             if (sep == std::string::npos) break;
+            
             std::string key = data.substr(start, sep - start);
             size_t end = data.find(';', sep);
-            std::string ts_str = (end == std::string::npos) ? data.substr(sep + 1) : data.substr(sep + 1, end - sep - 1);
-            uint64_t ts = std::stoull(ts_str);
-            out_map[key] = ts;
+            
+            std::string ts_str;
+            if (end == std::string::npos) {
+                ts_str = data.substr(sep + 1);
+            } else {
+                ts_str = data.substr(sep + 1, end - sep - 1);
+            }
+            
+            try {
+                uint64_t ts = std::stoull(ts_str);
+                out_map[key] = ts;
+            } catch (std::exception& e) {
+                std::cerr << "Error parsing timestamp for key " << key << ": " << e.what() << std::endl;
+            }
+            
             if (end == std::string::npos) break;
             start = end + 1;
         }
     }
-
+    
     void send_update_to_peer(const std::string& key) {
         try {
             auto val_ts = kv_store_.get_value_with_timestamp(key);
             std::string command = "PROPAGATE SET " + key + " " + val_ts.value + " " + std::to_string(val_ts.timestamp);
             propagate_update(command);
         } catch (std::exception& e) {
-            std::cerr << "Failed to send update to peer for key " << key << ": " << e.what() << "\n";
+            std::cerr << "Failed to send update to peer for key " << key << ": " << e.what() << std::endl;
         }
     }
-
+    
     void propagate_update(const std::string& command) {
         if (!peer_host_.empty() && peer_port_ > 0) {
             try {
@@ -132,11 +210,11 @@ private:
                 boost::asio::write(socket, boost::asio::buffer(command));
                 std::cout << "Propagated update to peer: " << command << std::endl;
             } catch (std::exception& e) {
-                std::cerr << "Failed to propagate update: " << e.what() << "\n";
+                std::cerr << "Failed to propagate update: " << e.what() << std::endl;
             }
         }
     }
-
+    
     uint64_t current_timestamp() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()

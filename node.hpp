@@ -93,7 +93,16 @@ public:
             kv_store_.del(key, timestamp);
             if (!is_propagated) propagate_update("PROPAGATE DEL " + key + " " + value + " " + std::to_string(timestamp));
             return "OK";
+        } else if (action == "GET_ALL") {
+            // Return all keys with timestamps for anti-entropy
+            auto keys = kv_store_.get_all_keys_with_timestamps();
+            std::stringstream ss;
+            for (const auto& [key, ts] : keys) {
+                ss << key << ":" << ts << ";";
+            }
+            return ss.str();
         }
+        
         return "Invalid command";
     }
 

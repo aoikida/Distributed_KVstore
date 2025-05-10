@@ -871,6 +871,7 @@ CMakeFiles/node2.dir/node2.cpp.o: node2.cpp \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdarg.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stddef.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdint.h \
+  merklecpp/merklecpp.h \
   anti_entropy/anti_entropy_manager.hpp \
   kv_store.hpp \
   merklecpp/merklecpp.h \

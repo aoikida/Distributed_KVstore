@@ -871,9 +871,9 @@ CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.o: anti_entrop
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdarg.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stddef.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdint.h \
+  merklecpp/merklecpp.h \
   anti_entropy/anti_entropy_manager.hpp \
   kv_store.hpp \
-  merklecpp/merklecpp.h \
   /opt/homebrew/Cellar/boost/1.88.0/include/boost/align/aligned_alloc.hpp \
   /opt/homebrew/Cellar/boost/1.88.0/include/boost/align/detail/aligned_alloc_posix.hpp \
   /opt/homebrew/Cellar/boost/1.88.0/include/boost/align/detail/is_alignment.hpp \
@@ -2491,6 +2491,7 @@ CMakeFiles/kv_store_lib.dir/node.cpp.o: node.cpp \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdarg.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stddef.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdint.h \
+  merklecpp/merklecpp.h \
   anti_entropy/anti_entropy_manager.hpp \
   kv_store.hpp \
   merklecpp/merklecpp.h \
