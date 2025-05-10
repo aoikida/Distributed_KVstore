@@ -1,0 +1,26 @@
+Running anti-entropy synchronization...
+Failed to fetch and update all keys: read_some: End of file [asio.misc:2]
+Propagated update to peer: PROPAGATE SET synckey syncvalue 1746862338724
+Anti-entropy synchronization completed.
+Running anti-entropy synchronization...
+Updated key from peer: conflictkey = value2
+Updated key from peer: synckey = syncvalue
+Propagated update to peer: PROPAGATE SET synckey syncvalue 1746862346786
+Propagated update to peer: PROPAGATE SET conflictkey value2 1746862346786
+Anti-entropy synchronization completed.
+Running anti-entropy synchronization...
+Updated key from peer: conflictkey = value2
+Updated key from peer: synckey = syncvalue
+Propagated update to peer: PROPAGATE SET synckey syncvalue 1746862351790
+Propagated update to peer: PROPAGATE SET conflictkey value2 1746862351790
+Anti-entropy synchronization completed.
+Running anti-entropy synchronization...
+Updated key from peer: bikey1 = bivalue1
+Updated key from peer: bikey2 = bivalue2
+Updated key from peer: conflictkey = value2
+Updated key from peer: synckey = syncvalue
+Propagated update to peer: PROPAGATE SET synckey syncvalue 1746862356796
+Propagated update to peer: PROPAGATE SET conflictkey value2 1746862356796
+Propagated update to peer: PROPAGATE SET bikey1 bivalue1 1746862356794
+Propagated update to peer: PROPAGATE SET bikey2 bivalue2 1746862356795
+Anti-entropy synchronization completed.

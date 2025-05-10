@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
