@@ -25,11 +25,13 @@ find_package(Boost 1.88.0 REQUIRED COMPONENTS system thread)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/anti_entropy)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../merklecpp)  # Include the merklecpp headers
 
 # Create a library with common sources
 add_library(kv_store_lib STATIC 
     node.cpp 
     anti_entropy/anti_entropy_manager.cpp
+    anti_entropy/merkle_tree_index.cpp
 )
 
 # Add executables

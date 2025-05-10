@@ -10,13 +10,15 @@
 #include <unordered_map>
 #include <sstream>
 #include <chrono>
+#include <iomanip>
 
 using boost::asio::ip::tcp;
 
-// Forward declaration
+// Forward declarations
 class AntiEntropyManager;
 
 class Node {
+    friend class AntiEntropyManager;  // Allow AntiEntropyManager to access Node's private members
 public:
     Node(boost::asio::io_context& io_context,
          short port,
@@ -100,6 +102,57 @@ public:
             for (const auto& [key, ts] : keys) {
                 ss << key << ":" << ts << ";";
             }
+            return ss.str();
+        } else if (action == "GET_MERKLE_ROOT") {
+            // Get the Merkle root hash
+            // Find the anti-entropy manager via friend pointer
+            if (anti_entropy_manager_ && anti_entropy_manager_->merkle_index_) {
+                auto root_hash = anti_entropy_manager_->merkle_index_->get_root_hash();
+                return root_hash.to_string();
+            }
+            return "EMPTY"; // No Merkle tree available
+        } else if (action == "GET_PATHS") {
+            // Get Merkle paths for the requested keys
+            if (!anti_entropy_manager_ || !anti_entropy_manager_->merkle_index_) {
+                return "EMPTY";
+            }
+            
+            // Parse requested keys
+            std::vector<std::string> keys;
+            std::string rest_of_command;
+            std::getline(iss, rest_of_command);
+            
+            size_t start = 0;
+            while (start < rest_of_command.size()) {
+                size_t end = rest_of_command.find(';', start);
+                if (end == std::string::npos) {
+                    if (start < rest_of_command.size()) {
+                        keys.push_back(rest_of_command.substr(start));
+                    }
+                    break;
+                }
+                
+                keys.push_back(rest_of_command.substr(start, end - start));
+                start = end + 1;
+            }
+            
+            // Get paths for these keys
+            auto paths = anti_entropy_manager_->merkle_index_->get_paths(keys);
+            
+            // Format response
+            std::stringstream ss;
+            for (size_t i = 0; i < keys.size() && i < paths.size(); i++) {
+                std::vector<uint8_t> serialized_path = paths[i];
+                
+                // Convert binary path to hex string
+                std::stringstream path_ss;
+                for (auto byte : serialized_path) {
+                    path_ss << std::setfill('0') << std::setw(2) << std::hex << static_cast<int>(byte);
+                }
+                
+                ss << keys[i] << "," << path_ss.str() << ";";
+            }
+            
             return ss.str();
         }
         

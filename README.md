@@ -1,137 +1,91 @@
-# Distributed Key-Value Store with Anti-Entropy Synchronization
+# Distributed Key-Value Store with Merkle Tree Anti-Entropy
 
-A simple distributed key-value store with two nodes that communicate via TCP sockets and use anti-entropy for eventual consistency.
+This distributed key-value store implements a simple but robust replication system using two synchronization methods:
 
-## Architecture
+1. Full state exchange (original implementation)
+2. Merkle tree-based efficient differential synchronization (new implementation)
 
-The system consists of two main components:
+## Overview
 
-1. **Node System**: Each node can process client requests (get, set, delete) and propagate updates to the other node.
-2. **Anti-Entropy Mechanism**: Ensures eventual consistency between nodes by periodically synchronizing data.
+The system consists of two nodes (implemented as separate processes) that communicate with each other over TCP sockets. Each node maintains its own key-value store and periodically synchronizes with the other node to ensure consistency.
 
-### Components
+## Components
 
-- `KeyValueStore`: The core data structure that stores key-value pairs with timestamps
-- `Node`: Handles client requests and communication between nodes
-- `AntiEntropyManager`: Manages periodic synchronization to ensure consistency
+### KeyValueStore
 
-## Features
+The core data structure that stores the key-value pairs with timestamps. Timestamps are used for conflict resolution (last-write-wins).
 
-- **Basic Operations**: GET, SET, DEL operations for key-value pairs
-- **Immediate Propagation**: When a client updates a key, the change is immediately propagated to the other node
-- **Anti-Entropy Synchronization**: Periodically reconciles differences between nodes to ensure consistency
-- **Conflict Resolution**: Uses timestamps to resolve conflicts (last-write-wins)
-- **Fault Tolerance**: Retries when communication between nodes fails
+### Node
 
-## How It Works
+Represents a single node in the distributed system. Handles client connections, processes commands, and coordinates with the anti-entropy mechanism.
 
-### Basic Operations
+### AntiEntropyManager
 
-1. **GET**: Retrieves a value for a given key
-2. **SET**: Sets a value for a key with a timestamp
-3. **DEL**: Deletes a key-value pair with a timestamp
+Manages the synchronization between nodes using one of two methods:
+- **Full State Exchange**: The original method where nodes exchange their complete sets of keys and timestamps
+- **Merkle Tree Synchronization**: A more efficient method that uses Merkle trees to identify differences
 
-### Propagation
+### MerkleTreeIndex
 
-When a client updates a value (SET/DEL), the node that receives the request:
-1. Updates its local store
-2. Propagates the update to the peer node with the original timestamp
+Maintains a Merkle tree representation of the key-value store, allowing efficient identification of differences between nodes.
 
-### Anti-Entropy Process
+## Anti-Entropy Process
 
-Every 5 seconds, each node:
-1. Fetches all keys from its peer
-2. Sends all its keys to the peer
-3. This ensures that even if immediate propagation fails, the system will eventually become consistent
+### Full State Exchange
 
-#### Merkle Trees for Efficient Anti-Entropy
+1. Node A requests all keys and timestamps from Node B
+2. Both nodes compare their states key-by-key
+3. For any differences, the newer version (based on timestamp) wins and is propagated
 
-While our current implementation uses direct key-by-key comparison, a more efficient approach for large datasets would use **Merkle trees** (hash trees):
+### Merkle Tree Synchronization
 
-**What are Merkle Trees?**
-- A tree data structure where leaf nodes contain hashes of key-value pairs
-- Non-leaf nodes contain hashes of their child nodes
-- The root hash represents the entire dataset's state
+1. Node A constructs a Merkle tree of its key-value pairs
+2. Node A requests the Merkle root hash from Node B
+3. If the roots match, both nodes are in sync
+4. If the roots differ:
+   - Node A sends all its keys to Node B
+   - Node B returns Merkle paths for those keys
+   - Node A compares these paths to identify exactly which keys differ
+   - Node A requests only the differing keys from Node B
+   - Both nodes update their stores accordingly
 
-**How Merkle Trees Enable Efficient Synchronization:**
-1. Nodes exchange only their Merkle tree root hashes (32 bytes)
-2. If roots match, data is identical (no further action needed)
-3. If roots differ, nodes traverse tree paths to find differing branches
-4. Only data in differing branches needs to be synchronized
+## Advantages of Merkle Tree Synchronization
 
-**Benefits of Merkle Tree-Based Anti-Entropy:**
-- **Bandwidth Efficiency**: Only transfers data that differs, not entire datasets
-- **Quick Verification**: Can quickly determine if stores are identical with minimal data transfer
-- **Scalability**: Efficiency improves with larger datasets (logarithmic vs. linear)
-- **Deterministic**: Same data always produces the same Merkle root
+1. **Reduced Network Traffic**: Only differences are exchanged, not the entire dataset
+2. **Efficiency at Scale**: Performance improvement becomes more significant as the dataset grows
+3. **Quick Verification**: Can quickly verify if two nodes are in sync with a single hash comparison
 
-**Implementation Considerations:**
-- Serialization and tree traversal add complexity
-- Proper handling of empty trees and error cases is crucial
-- Hash function choice affects security and performance
+## Client Operations
 
-Our codebase includes experimental Merkle tree support using the merklecpp library, which would allow for more efficient synchronization as the dataset grows.
+The system supports the following client operations:
+- `GET key` - Retrieve the value for a key
+- `SET key value` - Set the value for a key
+- `DEL key` - Delete a key
 
-### Conflict Resolution
+## Usage
 
-When both nodes update the same key, the update with the most recent timestamp wins. This ensures that the system converges to a consistent state.
-
-## How to Run
-
-### Prerequisites
-
-- C++17 compatible compiler
-- Boost libraries
-- CMake
-
-### Building the Project
+### Running Node 1
 
 ```bash
-cmake .
-make
+./node1
 ```
 
-### Running the Nodes
+### Running Node 2
 
 ```bash
-# In one terminal
-./node1
-
-# In another terminal
 ./node2
 ```
 
-### Running Tests
-
-The test script verifies functionality by testing basic operations, anti-entropy synchronization, conflict resolution, and bidirectional sync:
+### Client Interaction
 
 ```bash
-./test_kvstore.sh
+echo "SET mykey myvalue" | nc localhost 3000
+echo "GET mykey" | nc localhost 3000
 ```
 
-## Implementation Details
+### Implementation Details
 
-### Node Communication
-
-Nodes communicate using TCP sockets via Boost.Asio. A node can:
-- Accept client connections and process commands
-- Connect to another node to propagate updates
-- Perform periodic anti-entropy synchronization
-
-### Timestamps
-
-Each key-value pair has an associated timestamp (milliseconds since epoch) used for:
-- Determining which update is more recent
-- Resolving conflicts between nodes
-
-## Limitations and Future Improvements
-
-- Currently limited to two nodes
-- No persistent storage (in-memory only)
-- No partition tolerance (not fully CAP compliant)
-- Could be extended to use Merkle trees for more efficient synchronization
-- Could implement a more sophisticated conflict resolution mechanism (e.g., vector clocks)
-
-## License
-
-This project is open source and available under the MIT License.
+- Both nodes maintain the same structure and functionality
+- Anti-entropy runs periodically in the background (every 5 seconds)
+- Timestamps are used for conflict resolution (last-write-wins policy)
+- The Merkle tree is rebuilt whenever the key-value store changes

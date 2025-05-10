@@ -6,8 +6,13 @@
 #include <string>
 #include <chrono>
 #include <sstream>
+#include <memory>
+
+// Forward declaration
+class MerkleTreeIndex;
 
 class KeyValueStore {
+    friend class MerkleTreeIndex;
 public:
     struct ValueWithTimestamp {
         std::string value;
@@ -25,6 +30,10 @@ public:
         auto it = store_.find(key);
         if (it == store_.end() || timestamp >= it->second.timestamp) {
             store_[key] = {value, timestamp};
+            // Update Merkle tree if available
+            if (merkle_index) {
+                merkle_index->rebuild(*this);
+            }
             return true;
         }
         return false;
@@ -35,14 +44,27 @@ public:
         auto it = store_.find(key);
         if (it != store_.end() && timestamp >= it->second.timestamp) {
             store_.erase(it);
+            // Update Merkle tree if available
+            if (merkle_index) {
+                merkle_index->rebuild(*this);
+            }
             return true;
         }
         return false;
     }
 
-    // For anti-entropy: get all keys with timestamps
-    std::unordered_map<std::string, uint64_t> get_all_keys_with_timestamps() {
+    // Set the merkle tree index to use for this store
+    void set_merkle_index(std::shared_ptr<MerkleTreeIndex> index) {
         std::lock_guard<std::mutex> lock(mutex_);
+        merkle_index = index;
+        if (merkle_index) {
+            merkle_index->rebuild(*this);
+        }
+    }
+
+    // For anti-entropy: get all keys with timestamps
+    std::unordered_map<std::string, uint64_t> get_all_keys_with_timestamps() const {
+        std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(mutex_));
         std::unordered_map<std::string, uint64_t> result;
         for (const auto& kv : store_) {
             result[kv.first] = kv.second.timestamp;
@@ -51,8 +73,8 @@ public:
     }
 
     // For anti-entropy: get value with timestamp for a key
-    ValueWithTimestamp get_value_with_timestamp(const std::string& key) {
-        std::lock_guard<std::mutex> lock(mutex_);
+    ValueWithTimestamp get_value_with_timestamp(const std::string& key) const {
+        std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(mutex_));
         auto it = store_.find(key);
         if (it != store_.end()) {
             return it->second;
@@ -93,7 +115,8 @@ public:
 
 private:
     std::unordered_map<std::string, ValueWithTimestamp> store_;
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
+    std::shared_ptr<MerkleTreeIndex> merkle_index;
 };
 
 #endif // KV_STORE_HPP

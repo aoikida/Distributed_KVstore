@@ -1,5 +1,6 @@
 #include "node.hpp"
 #include "anti_entropy/anti_entropy_manager.hpp"
+#include <iomanip> // for std::setfill, std::setw, std::hex
 #include <boost/asio.hpp>
 
 Node::Node(boost::asio::io_context& io_context, short port, const std::string& peer_host, short peer_port)
@@ -12,9 +13,13 @@ Node::Node(boost::asio::io_context& io_context, short port, const std::string& p
 
 void Node::start_anti_entropy() {
     boost::asio::io_context& io_context = static_cast<boost::asio::io_context&>(acceptor_.get_executor().context());
+    
+    // Create the anti-entropy manager with Merkle tree synchronization enabled
     anti_entropy_manager_ = std::make_unique<AntiEntropyManager>(
         io_context, kv_store_, peer_host_, peer_port_);
+    
     anti_entropy_manager_->start();
+    std::cout << "Started anti-entropy with Merkle tree synchronization" << std::endl;
 }
 
 void Node::start_accept() {

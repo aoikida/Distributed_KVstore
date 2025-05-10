@@ -7,16 +7,35 @@
 #include <string>
 #include <iostream>
 #include <chrono>
+#include <memory>
 #include "kv_store.hpp"
+#include "merkle_tree_index.hpp"
 
 using boost::asio::ip::tcp;
 
+class Node;  // Forward declaration
+
 class AntiEntropyManager {
+    friend class Node;  // Grant Node access to merkle_index_
+    
+public:
+    enum SyncMode {
+        FULL_STATE_EXCHANGE, // Original method with direct key-value exchange
+        MERKLE_TREE          // New method using Merkle trees for efficient sync
+    };
 public:
     AntiEntropyManager(boost::asio::io_context& io_context, KeyValueStore& kv_store,
-                       const std::string& peer_host, short peer_port)
+                       const std::string& peer_host, short peer_port,
+                       SyncMode mode = MERKLE_TREE)
         : io_context_(io_context), kv_store_(kv_store),
-          peer_host_(peer_host), peer_port_(peer_port) {}
+          peer_host_(peer_host), peer_port_(peer_port), sync_mode_(mode) 
+    {
+        // Initialize Merkle tree index if using Merkle tree sync mode
+        if (sync_mode_ == MERKLE_TREE) {
+            merkle_index_ = std::make_shared<MerkleTreeIndex>();
+            kv_store_.set_merkle_index(merkle_index_);
+        }
+    }
 
     void start() {
         anti_entropy_thread_ = std::thread([this]() {
@@ -28,7 +47,85 @@ public:
         anti_entropy_thread_.detach();
     }
 
+    // Main anti-entropy method - delegates to appropriate implementation
     void run_anti_entropy() {
+        if (sync_mode_ == MERKLE_TREE) {
+            run_merkle_anti_entropy();
+        } else {
+            run_full_state_anti_entropy();
+        }
+    }
+
+    // Merkle tree-based anti-entropy method
+    void run_merkle_anti_entropy() {
+        try {
+            std::cout << "Starting Merkle tree anti-entropy cycle..." << std::endl;
+            
+            if (!merkle_index_ || merkle_index_->empty()) {
+                std::cout << "Local Merkle tree is empty, falling back to full state exchange..." << std::endl;
+                run_full_state_anti_entropy();
+                return;
+            }
+            
+            // Step 1: Get local Merkle root
+            auto local_root = merkle_index_->get_root_hash();
+            std::cout << "Local Merkle root: " << local_root.to_string().substr(0, 8) << "..." << std::endl;
+            
+            // Step 2: Get peer's Merkle root
+            auto peer_root = request_peer_merkle_root();
+            if (peer_root.to_string() == "0000000000000000000000000000000000000000000000000000000000000000") {
+                std::cout << "Peer has no Merkle tree, falling back to full state exchange..." << std::endl;
+                run_full_state_anti_entropy();
+                return;
+            }
+            
+            std::cout << "Peer Merkle root: " << peer_root.to_string().substr(0, 8) << "..." << std::endl;
+            
+            // Step 3: If roots are identical, stores are in sync
+            if (local_root.to_string() == peer_root.to_string()) {
+                std::cout << "Merkle roots match, stores are in sync" << std::endl;
+                return;
+            }
+            
+            // Step 4: Roots differ, identify the differences
+            std::cout << "Merkle roots differ, finding differences..." << std::endl;
+            
+            // Get all local keys
+            auto local_keys = kv_store_.get_all_keys_with_timestamps();
+            std::vector<std::string> key_list;
+            for (const auto& [key, _] : local_keys) {
+                key_list.push_back(key);
+            }
+            
+            // Get Merkle paths from peer for these keys
+            auto peer_paths = request_peer_paths(key_list);
+            
+            // Find exactly which keys differ
+            auto differing_keys = merkle_index_->find_differences(peer_paths, key_list);
+            
+            // Step 5: Resolve differences for the identified keys
+            if (!differing_keys.empty()) {
+                std::cout << "Found " << differing_keys.size() << " different keys" << std::endl;
+                
+                // Fetch values from peer for these keys
+                for (const auto& key : differing_keys) {
+                    fetch_and_update_key(key);
+                }
+                
+                std::cout << "Successfully synchronized differing keys" << std::endl;
+            }
+            
+        } catch (std::exception& e) {
+            std::cerr << "Merkle anti-entropy error: " << e.what() << std::endl;
+            
+            // Fall back to full state exchange on error
+            std::cout << "Falling back to full state exchange..." << std::endl;
+            run_full_state_anti_entropy();
+        }
+    }
+
+    // Original anti-entropy method
+    void run_full_state_anti_entropy() {
         try {
             std::cout << "Starting anti-entropy cycle..." << std::endl;
             
@@ -215,6 +312,97 @@ private:
         }
     }
     
+    // Request the Merkle root hash from peer
+    merkle::Hash request_peer_merkle_root() {
+        try {
+            tcp::socket socket(io_context_);
+            tcp::resolver resolver(io_context_);
+            boost::asio::connect(socket, resolver.resolve(peer_host_, std::to_string(peer_port_)));
+            
+            // Request the Merkle root
+            std::string request = "GET_MERKLE_ROOT";
+            boost::asio::write(socket, boost::asio::buffer(request));
+            
+            // Read response
+            std::array<char, 1024> buffer;
+            size_t length = socket.read_some(boost::asio::buffer(buffer));
+            std::string response(buffer.data(), length);
+            
+            // If empty, peer doesn't have a Merkle tree yet
+            if (response.empty() || response == "EMPTY") {
+                return merkle::Hash(); // Empty hash
+            }
+            
+            return merkle::Hash(response);
+        } catch (std::exception& e) {
+            std::cerr << "Error getting peer's Merkle root: " << e.what() << std::endl;
+            return merkle::Hash(); // Empty hash on error
+        }
+    }
+    
+    // Request Merkle paths from peer for the given keys
+    std::vector<merkle::Path> request_peer_paths(const std::vector<std::string>& keys) {
+        std::vector<merkle::Path> paths;
+        
+        if (keys.empty()) {
+            return paths;
+        }
+        
+        try {
+            tcp::socket socket(io_context_);
+            tcp::resolver resolver(io_context_);
+            boost::asio::connect(socket, resolver.resolve(peer_host_, std::to_string(peer_port_)));
+            
+            // Build the request
+            std::string request = "GET_PATHS ";
+            for (const auto& key : keys) {
+                request += key + ";";
+            }
+            
+            // Send request
+            boost::asio::write(socket, boost::asio::buffer(request));
+            
+            // Read response
+            std::array<char, 16384> buffer; // Larger buffer for paths
+            size_t length = socket.read_some(boost::asio::buffer(buffer));
+            std::string response(buffer.data(), length);
+            
+            // Parse paths from response
+            // Format: key1,serialized_path1;key2,serialized_path2;...
+            size_t start = 0;
+            while (start < response.size()) {
+                size_t sep = response.find(',', start);
+                if (sep == std::string::npos) break;
+                
+                std::string key = response.substr(start, sep - start);
+                size_t end = response.find(';', sep);
+                
+                std::string path_str;
+                if (end == std::string::npos) {
+                    path_str = response.substr(sep + 1);
+                } else {
+                    path_str = response.substr(sep + 1, end - sep - 1);
+                }
+                
+                // Convert path string to binary
+                std::vector<uint8_t> path_bytes;
+                for (size_t i = 0; i < path_str.size(); i += 2) {
+                    path_bytes.push_back(std::stoi(path_str.substr(i, 2), nullptr, 16));
+                }
+                
+                // Deserialize path
+                paths.push_back(merkle::Path(path_bytes));
+                
+                if (end == std::string::npos) break;
+                start = end + 1;
+            }
+        } catch (std::exception& e) {
+            std::cerr << "Error getting peer's Merkle paths: " << e.what() << std::endl;
+        }
+        
+        return paths;
+    }
+
     uint64_t current_timestamp() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()
@@ -225,6 +413,8 @@ private:
     KeyValueStore& kv_store_;
     std::string peer_host_;
     short peer_port_;
+    SyncMode sync_mode_;
+    std::shared_ptr<MerkleTreeIndex> merkle_index_;
     std::thread anti_entropy_thread_;
 };
 
