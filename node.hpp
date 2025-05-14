@@ -2,6 +2,7 @@
 #define NODE_HPP
 
 #include "kv_store.hpp"
+#include "anti_entropy/anti_entropy_manager.hpp"
 #include <boost/asio.hpp>
 #include <iostream>
 #include <thread>
@@ -15,7 +16,7 @@
 using boost::asio::ip::tcp;
 
 // Forward declarations
-class AntiEntropyManager;
+//class AntiEntropyManager;
 
 class Node {
     friend class AntiEntropyManager;  // Allow AntiEntropyManager to access Node's private members
@@ -28,8 +29,8 @@ public:
     // Session class for handling client connections
     class Session : public std::enable_shared_from_this<Session> {
     public:
-        Session(tcp::socket socket, KeyValueStore& kv_store)
-            : socket_(std::move(socket)), kv_store_(kv_store) {}
+        Session(tcp::socket socket, Node* node)
+            : socket_(std::move(socket)), node_(node) {}
         
         void start() {
             do_read();
@@ -42,7 +43,7 @@ public:
                 [this, self](boost::system::error_code ec, std::size_t length) {
                     if (!ec) {
                         std::string request(data_.data(), length);
-                        std::string response = kv_store_.process_command(request);
+                        std::string response = node_->process_command(request);
                         do_write(response);
                     }
                 });
@@ -59,7 +60,7 @@ public:
         }
         
         tcp::socket socket_;
-        KeyValueStore& kv_store_;
+        Node* node_;
         std::array<char, 1024> data_;
     };
 
@@ -70,6 +71,7 @@ public:
     void start_anti_entropy();
 
     std::string process_command(const std::string& command) {
+        std::cout << "[process_command] Received: '" << command << "'" << std::endl;
         std::istringstream iss(command);
         std::string first, action, key, value;
         iss >> first;
@@ -106,14 +108,14 @@ public:
         } else if (action == "GET_MERKLE_ROOT") {
             // Get the Merkle root hash
             // Find the anti-entropy manager via friend pointer
-            if (anti_entropy_manager_ && anti_entropy_manager_->merkle_index_) {
-                auto root_hash = anti_entropy_manager_->merkle_index_->get_root_hash();
+            if (anti_entropy_manager_ && anti_entropy_manager_->get_merkle_index()) {
+                auto root_hash = anti_entropy_manager_->get_merkle_index()->get_root_hash();
                 return root_hash.to_string();
             }
             return "EMPTY"; // No Merkle tree available
         } else if (action == "GET_PATHS") {
             // Get Merkle paths for the requested keys
-            if (!anti_entropy_manager_ || !anti_entropy_manager_->merkle_index_) {
+            if (!anti_entropy_manager_ || !anti_entropy_manager_->get_merkle_index()) {
                 return "EMPTY";
             }
             
@@ -137,7 +139,7 @@ public:
             }
             
             // Get paths for these keys
-            auto paths = anti_entropy_manager_->merkle_index_->get_paths(keys);
+            auto paths = anti_entropy_manager_->get_merkle_index()->get_paths(keys);
             
             // Format response
             std::stringstream ss;
@@ -272,5 +274,7 @@ private:
     std::string peer_host_;
     short peer_port_;
 };
+
+void start_accept();
 
 #endif // NODE_HPP

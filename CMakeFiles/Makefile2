@@ -63,15 +63,11 @@ CMAKE_BINARY_DIR = /Users/aoikida/Desktop/anti-entropy/distributed_kv_store
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/kv_store_lib.dir/all
-all: CMakeFiles/node1.dir/all
-all: CMakeFiles/node2.dir/all
+all:
 .PHONY : all
 
 # The main recursive "codegen" target.
-codegen: CMakeFiles/kv_store_lib.dir/codegen
-codegen: CMakeFiles/node1.dir/codegen
-codegen: CMakeFiles/node2.dir/codegen
+codegen:
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
@@ -79,106 +75,8 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/kv_store_lib.dir/clean
-clean: CMakeFiles/node1.dir/clean
-clean: CMakeFiles/node2.dir/clean
+clean:
 .PHONY : clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/kv_store_lib.dir
-
-# All Build rule for target.
-CMakeFiles/kv_store_lib.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/kv_store_lib.dir/build.make CMakeFiles/kv_store_lib.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/kv_store_lib.dir/build.make CMakeFiles/kv_store_lib.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=1,2,3 "Built target kv_store_lib"
-.PHONY : CMakeFiles/kv_store_lib.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/kv_store_lib.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles 3
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/kv_store_lib.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles 0
-.PHONY : CMakeFiles/kv_store_lib.dir/rule
-
-# Convenience name for target.
-kv_store_lib: CMakeFiles/kv_store_lib.dir/rule
-.PHONY : kv_store_lib
-
-# codegen rule for target.
-CMakeFiles/kv_store_lib.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/kv_store_lib.dir/build.make CMakeFiles/kv_store_lib.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=1,2,3 "Finished codegen for target kv_store_lib"
-.PHONY : CMakeFiles/kv_store_lib.dir/codegen
-
-# clean rule for target.
-CMakeFiles/kv_store_lib.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/kv_store_lib.dir/build.make CMakeFiles/kv_store_lib.dir/clean
-.PHONY : CMakeFiles/kv_store_lib.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/node1.dir
-
-# All Build rule for target.
-CMakeFiles/node1.dir/all: CMakeFiles/kv_store_lib.dir/all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node1.dir/build.make CMakeFiles/node1.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node1.dir/build.make CMakeFiles/node1.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=4,5 "Built target node1"
-.PHONY : CMakeFiles/node1.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/node1.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles 5
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/node1.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles 0
-.PHONY : CMakeFiles/node1.dir/rule
-
-# Convenience name for target.
-node1: CMakeFiles/node1.dir/rule
-.PHONY : node1
-
-# codegen rule for target.
-CMakeFiles/node1.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node1.dir/build.make CMakeFiles/node1.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=4,5 "Finished codegen for target node1"
-.PHONY : CMakeFiles/node1.dir/codegen
-
-# clean rule for target.
-CMakeFiles/node1.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node1.dir/build.make CMakeFiles/node1.dir/clean
-.PHONY : CMakeFiles/node1.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/node2.dir
-
-# All Build rule for target.
-CMakeFiles/node2.dir/all: CMakeFiles/kv_store_lib.dir/all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node2.dir/build.make CMakeFiles/node2.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node2.dir/build.make CMakeFiles/node2.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=6,7 "Built target node2"
-.PHONY : CMakeFiles/node2.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/node2.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles 5
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/node2.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles 0
-.PHONY : CMakeFiles/node2.dir/rule
-
-# Convenience name for target.
-node2: CMakeFiles/node2.dir/rule
-.PHONY : node2
-
-# codegen rule for target.
-CMakeFiles/node2.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node2.dir/build.make CMakeFiles/node2.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=6,7 "Finished codegen for target node2"
-.PHONY : CMakeFiles/node2.dir/codegen
-
-# clean rule for target.
-CMakeFiles/node2.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node2.dir/build.make CMakeFiles/node2.dir/clean
-.PHONY : CMakeFiles/node2.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

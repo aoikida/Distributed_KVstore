@@ -1,2 +1,2 @@
-/usr/bin/ar qc libkv_store_lib.a CMakeFiles/kv_store_lib.dir/node.cpp.o CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.o
+/usr/bin/ar qc libkv_store_lib.a CMakeFiles/kv_store_lib.dir/node.cpp.o CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.o CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o
 /usr/bin/ranlib libkv_store_lib.a

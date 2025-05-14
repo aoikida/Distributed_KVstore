@@ -1,30 +1,38 @@
-Starting anti-entropy cycle...
-Peer version of key 'synckey' is newer, fetching...
-Updated key from peer: synckey = syncvalue
-Anti-entropy synchronization completed successfully
-Starting anti-entropy cycle...
-Peer version of key 'conflictkey' is newer, fetching...
-Updated key from peer: conflictkey = value2
-Peer version of key 'synckey' is newer, fetching...
-Updated key from peer: synckey = syncvalue
-Anti-entropy synchronization completed successfully
-Starting anti-entropy cycle...
-Key 'bikey1' exists locally but not on peer, sending...
-Propagated update to peer: PROPAGATE SET bikey1 bivalue1 1746863240540
-Key 'bikey2' exists on peer but not locally, fetching...
-Updated key from peer: bikey2 = bivalue2
-Peer version of key 'conflictkey' is newer, fetching...
-Updated key from peer: conflictkey = value2
-Peer version of key 'synckey' is newer, fetching...
-Updated key from peer: synckey = syncvalue
-Anti-entropy synchronization completed successfully
-Starting anti-entropy cycle...
-Peer version of key 'bikey1' is newer, fetching...
-Updated key from peer: bikey1 = bivalue1
-Peer version of key 'bikey2' is newer, fetching...
-Updated key from peer: bikey2 = bivalue2
-Peer version of key 'conflictkey' is newer, fetching...
-Updated key from peer: conflictkey = value2
-Peer version of key 'synckey' is newer, fetching...
-Updated key from peer: synckey = syncvalue
-Anti-entropy synchronization completed successfully
+main() started
+io_context created
+Node created
+start_anti_entropy: entered
+start_anti_entropy: merkle_index created
+start_anti_entropy: about to set_merkle_index
+KeyValueStore::set_merkle_index: entered
+KeyValueStore::set_merkle_index: calling rebuild
+KeyValueStore::get_all_key_value_data: entered
+KeyValueStore::get_all_key_value_data: returning
+Rebuilt Merkle tree with 0 key-value pairs
+KeyValueStore::set_merkle_index: rebuild done
+start_anti_entropy: merkle_index set in kv_store_
+start_anti_entropy: anti_entropy_manager_ created
+Started anti-entropy with Merkle tree synchronization
+Started anti-entropy
+About to run io_context
+[AntiEntropy] Running anti-entropy sync...
+[AntiEntropy] Local Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+Anti-entropy error: connect: Connection refused [system:61 at /opt/homebrew/include/boost/asio/detail/reactive_socket_service.hpp:587:33 in function 'connect']
+[process_command] Received: 'GET_MERKLE_ROOT'
+[AntiEntropy] Running anti-entropy sync...
+[AntiEntropy] Local Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Connected to peer 127.0.0.1:5009
+[AntiEntropy] Peer Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Merkle roots match. No sync needed.
+[process_command] Received: 'GET_MERKLE_ROOT'
+[AntiEntropy] Running anti-entropy sync...
+[AntiEntropy] Local Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Connected to peer 127.0.0.1:5009
+[AntiEntropy] Peer Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Merkle roots match. No sync needed.
+[process_command] Received: 'GET_MERKLE_ROOT'
+[AntiEntropy] Running anti-entropy sync...
+[AntiEntropy] Local Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Connected to peer 127.0.0.1:5009
+[AntiEntropy] Peer Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Merkle roots match. No sync needed.

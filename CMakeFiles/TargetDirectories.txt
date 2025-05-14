@@ -1,5 +1,2 @@
-/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles/kv_store_lib.dir
-/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles/node1.dir
-/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles/node2.dir
 /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles/edit_cache.dir
 /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles/rebuild_cache.dir

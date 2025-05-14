@@ -1,26 +1,30 @@
-Starting anti-entropy cycle...
-Local store is empty, checking if peer has any data...
-Peer has data, fetching...
-Updated key from peer: synckey = syncvalue
-Starting anti-entropy cycle...
-Local version of key 'conflictkey' is newer, sending to peer...
-Propagated update to peer: PROPAGATE SET conflictkey value2 1746863234504
-Peer version of key 'synckey' is newer, fetching...
-Updated key from peer: synckey = syncvalue
-Anti-entropy synchronization completed successfully
-Starting anti-entropy cycle...
-Peer version of key 'conflictkey' is newer, fetching...
-Updated key from peer: conflictkey = value2
-Peer version of key 'synckey' is newer, fetching...
-Updated key from peer: synckey = syncvalue
-Anti-entropy synchronization completed successfully
-Starting anti-entropy cycle...
-Peer version of key 'bikey2' is newer, fetching...
-Updated key from peer: bikey2 = bivalue2
-Key 'bikey1' exists on peer but not locally, fetching...
-Updated key from peer: bikey1 = bivalue1
-Peer version of key 'conflictkey' is newer, fetching...
-Updated key from peer: conflictkey = value2
-Peer version of key 'synckey' is newer, fetching...
-Updated key from peer: synckey = syncvalue
-Anti-entropy synchronization completed successfully
+start_anti_entropy: entered
+start_anti_entropy: merkle_index created
+start_anti_entropy: about to set_merkle_index
+KeyValueStore::set_merkle_index: entered
+KeyValueStore::set_merkle_index: calling rebuild
+KeyValueStore::get_all_key_value_data: entered
+KeyValueStore::get_all_key_value_data: returning
+Rebuilt Merkle tree with 0 key-value pairs
+KeyValueStore::set_merkle_index: rebuild done
+start_anti_entropy: merkle_index set in kv_store_
+start_anti_entropy: anti_entropy_manager_ created
+Started anti-entropy with Merkle tree synchronization
+[AntiEntropy] Running anti-entropy sync...
+[AntiEntropy] Local Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Connected to peer 127.0.0.1:5008
+[AntiEntropy] Peer Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Merkle roots match. No sync needed.
+[process_command] Received: 'GET_MERKLE_ROOT'
+[AntiEntropy] Running anti-entropy sync...
+[AntiEntropy] Local Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Connected to peer 127.0.0.1:5008
+[AntiEntropy] Peer Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Merkle roots match. No sync needed.
+[process_command] Received: 'GET_MERKLE_ROOT'
+[AntiEntropy] Running anti-entropy sync...
+[AntiEntropy] Local Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Connected to peer 127.0.0.1:5008
+[AntiEntropy] Peer Merkle root: 0000000000000000000000000000000000000000000000000000000000000000
+[AntiEntropy] Merkle roots match. No sync needed.
+[process_command] Received: 'GET_MERKLE_ROOT'

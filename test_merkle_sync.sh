@@ -8,7 +8,7 @@ rm -f node1.log node2.log
 
 # Start node1 in the background
 echo "Starting node1..."
-./node1 > node1.log 2>&1 &
+./build/node1 > node1.log 2>&1 &
 NODE1_PID=$!
 
 # Wait for node1 to start
@@ -16,7 +16,7 @@ sleep 2
 
 # Start node2 in the background
 echo "Starting node2..."
-./node2 > node2.log 2>&1 &
+./build/node2 > node2.log 2>&1 &
 NODE2_PID=$!
 
 # Wait for node2 to start
@@ -34,9 +34,9 @@ sleep 6
 
 # Verify that node2 has the same keys
 echo "Verifying synchronization on node2..."
-echo "GET key1" | nc localhost 3001
-echo "GET key2" | nc localhost 3001
-echo "GET key3" | nc localhost 3001
+echo -n "GET key1: " && echo "GET key1" | nc localhost 3001
+echo -n "GET key2: " && echo "GET key2" | nc localhost 3001
+echo -n "GET key3: " && echo "GET key3" | nc localhost 3001
 
 # Set a key on node2
 echo "Setting a new key on node2..."
@@ -48,7 +48,7 @@ sleep 6
 
 # Verify that node1 has the new key
 echo "Verifying node1 has the new key..."
-echo "GET key4" | nc localhost 3000
+echo -n "GET key4: " && echo "GET key4" | nc localhost 3000
 
 # Clean up
 echo "Cleaning up..."

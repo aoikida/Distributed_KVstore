@@ -14,6 +14,9 @@
 # EXTERNAL cache entries
 ########################
 
+//No help, variable specified on the command line.
+BOOST_ROOT:UNINITIALIZED=/opt/homebrew/opt/boost
+
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=/opt/homebrew/opt/boost/lib/cmake/Boost-1.88.0
 
@@ -25,7 +28,7 @@ CMAKE_AR:FILEPATH=/usr/bin/ar
 
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
 // MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=
+CMAKE_BUILD_TYPE:STRING=Release
 
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
@@ -225,6 +228,9 @@ DistributedKVStore_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 DistributedKVStore_SOURCE_DIR:STATIC=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store
 
+//The directory containing a CMake configuration file for boost_date_time.
+boost_date_time_DIR:PATH=/opt/homebrew/opt/boost/lib/cmake/boost_date_time-1.88.0
+
 //The directory containing a CMake configuration file for boost_headers.
 boost_headers_DIR:PATH=/opt/homebrew/opt/boost/lib/cmake/boost_headers-1.88.0
 
@@ -233,6 +239,15 @@ boost_system_DIR:PATH=/opt/homebrew/opt/boost/lib/cmake/boost_system-1.88.0
 
 //The directory containing a CMake configuration file for boost_thread.
 boost_thread_DIR:PATH=/opt/homebrew/lib/cmake/boost_thread-1.88.0
+
+//Value Computed by CMake
+distributed_kv_store_BINARY_DIR:STATIC=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store
+
+//Value Computed by CMake
+distributed_kv_store_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+distributed_kv_store_SOURCE_DIR:STATIC=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store
 
 
 ########################
@@ -384,6 +399,8 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//ADVANCED property for variable: boost_date_time_DIR
+boost_date_time_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: boost_headers_DIR
 boost_headers_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: boost_system_DIR

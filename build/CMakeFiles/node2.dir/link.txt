@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/node2.dir/node2.cpp.o -o node2  libkv_store_lib.a /opt/homebrew/lib/libboost_thread.dylib /opt/homebrew/lib/libboost_date_time.dylib /opt/homebrew/lib/libboost_chrono.dylib -lpthread /opt/homebrew/lib/libboost_system.dylib

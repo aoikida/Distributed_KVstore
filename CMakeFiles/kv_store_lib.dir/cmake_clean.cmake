@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.o"
   "CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.o.d"
+  "CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o"
+  "CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o.d"
   "CMakeFiles/kv_store_lib.dir/node.cpp.o"
   "CMakeFiles/kv_store_lib.dir/node.cpp.o.d"
   "libkv_store_lib.a"

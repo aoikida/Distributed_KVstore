@@ -100,19 +100,35 @@ CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/anti_entropy/anti_entropy_manager.cpp -o CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.s
 
+CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o: CMakeFiles/kv_store_lib.dir/flags.make
+CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o: anti_entropy/merkle_tree_index.cpp
+CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o: CMakeFiles/kv_store_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o -MF CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o.d -o CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o -c /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/anti_entropy/merkle_tree_index.cpp
+
+CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/anti_entropy/merkle_tree_index.cpp > CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.i
+
+CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/aoikida/Desktop/anti-entropy/distributed_kv_store/anti_entropy/merkle_tree_index.cpp -o CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.s
+
 # Object files for target kv_store_lib
 kv_store_lib_OBJECTS = \
 "CMakeFiles/kv_store_lib.dir/node.cpp.o" \
-"CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.o"
+"CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.o" \
+"CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o"
 
 # External object files for target kv_store_lib
 kv_store_lib_EXTERNAL_OBJECTS =
 
 libkv_store_lib.a: CMakeFiles/kv_store_lib.dir/node.cpp.o
 libkv_store_lib.a: CMakeFiles/kv_store_lib.dir/anti_entropy/anti_entropy_manager.cpp.o
+libkv_store_lib.a: CMakeFiles/kv_store_lib.dir/anti_entropy/merkle_tree_index.cpp.o
 libkv_store_lib.a: CMakeFiles/kv_store_lib.dir/build.make
 libkv_store_lib.a: CMakeFiles/kv_store_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libkv_store_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/aoikida/Desktop/anti-entropy/distributed_kv_store/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libkv_store_lib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/kv_store_lib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/kv_store_lib.dir/link.txt --verbose=$(VERBOSE)
 
